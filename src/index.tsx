@@ -3,24 +3,42 @@ import { render } from 'react-dom';
 
 import './styles.css';
 
-interface Props {
-  value: number;
-}
+const useTitle = (initVal: string) => {
+  const [title, setTitle] = React.useState(initVal);
+  const updateTitle = () => {
+    const htmlTitle = document.querySelector('title');
+    htmlTitle.innerText = title;
+  };
+  React.useEffect(updateTitle, [title]);
+  return setTitle;
+};
 
-function App(props: Props) {
-  const [item, setItem] = React.useState(props.value);
-  const incItem = () => setItem(item + 1);
-  const decItem = () => setItem(item - 1);
-  const test = '1';
+const useClick = (onClick: () => void) => {
+  const element = React.useRef();
+  React.useEffect(() => {
+    if (element.current) {
+      (element.current as HTMLElement).addEventListener('click', onClick);
+    }
+    // 이때 반환한 함수는 componentWillUnmount때 실행됨
+    return () => {
+      if (element.current) {
+        (element.current as HTMLElement).removeEventListener('click', onClick);
+      }
+    };
+  }, []);
+  return element;
+};
+
+function App(props: { value: string }) {
+  const sayHello = () => console.log('hello');
+  const title = useClick(sayHello);
+
   return (
     <div className="App">
-      <h1>Hello {item}</h1>
-      <h2>좋당</h2>
-      <button onClick={incItem}>증가</button>
-      <button onClick={decItem}>감소</button>
+      <h1 ref={title}>HI</h1>
     </div>
   );
 }
 
 const rootElement = document.getElementById('root');
-render(<App value={10} />, rootElement);
+render(<App value="수정중..." />, rootElement);
